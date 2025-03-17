@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f8f8f8;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 300px;
+        }
+        .controls input, .controls select, .controls button {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .controls button {
+            background: #b8860b;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .certificate {
+            width: 800px;
+            height: 500px;
+            text-align: center;
+            position: relative;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .gold-theme {
+            border: 15px solid #b8860b;
+        }
+        .blue-theme {
+            border: 15px solid #1e3a8a;
+            background: #e0f7ff;
+        }
+        .dark-theme {
+            border: 15px solid #333;
+            background: #222;
+            color: white;
+        }
+        .certificate .logo {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            object-fit: contain;
+        }
+        .certificate h1 {
+            font-size: 40px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 120px;
+        }
+        .certificate h2 {
+            font-size: 30px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .certificate p {
+            font-size: 22px;
+            margin: 10px 0;
+        }
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            bottom: 30px;
+            width: 90%;
+            left: 5%;
+            font-size: 20px;
+        }
+        .date {
+            text-align: left;
+        }
+        .signature {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <input type="text" id="orgName" placeholder="Enter Organization Name">
+            <input type="file" id="logoInput" accept="image/*" placeholder="enter logo">
+            <input type="text" id="name" placeholder="Enter Name">
+            <input type="text" id="achievement" placeholder="Enter Achievement">
+            <input type="text" id="grade" placeholder="Enter Grade">
+            <select id="theme" onchange="applyTheme()">
+                <option value="gold">Gold Theme</option>
+                <option value="blue">Blue Royal Theme</option>
+                <option value="dark">Elegant Dark Theme</option>
+            </select>
+            <button onclick="generateCertificate()">Generate Certificate</button>
+            <button onclick="downloadCertificate()">Download PDF</button>
+        </div>
+        <div id="certificate" class="certificate gold-theme">
+            <img id="logo" class="logo" src="" style="display: none;">
+            <h2 id="certOrg">[Organization Name]</h2>
+            <h1>Certificate of Excellence</h1>
+            
+            <p>We are proud to certify that</p><h2 id="certName">[Name]</h2>
+            <p id="certAchievement">has demonstrated outstanding performance in [Achievement]</p>
+            <p id="certGrade">With an exemplary grade of [Grade]</p>
+            <div class="signature-section">
+                <p class="date">Date: ___________</p>
+                <p class="signature">Signature: ___________</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        function generateCertificate() {
+            document.getElementById("certOrg").innerText = document.getElementById("orgName").value || "[Organization Name]";
+            document.getElementById("certName").innerText = document.getElementById("name").value || "[Name]";
+            document.getElementById("certAchievement").innerText = "has demonstrated outstanding performance in " + (document.getElementById("achievement").value || "[Achievement]");
+            document.getElementById("certGrade").innerText = "With an exemplary grade of " + (document.getElementById("grade").value || "[Grade]");
+        
+            let logoInput = document.getElementById("logoInput");
+            let logo = document.getElementById("logo");
+            if (logoInput.files && logoInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    logo.src = e.target.result;
+                    logo.style.display = "block";
+                }
+                reader.readAsDataURL(logoInput.files[0]);
+            }
+        }
+        function applyTheme() {
+            let cert = document.getElementById("certificate");
+            let theme = document.getElementById("theme").value;
+            cert.className = `certificate ${theme}-theme`;
+        }
+        function downloadCertificate() {
+            html2canvas(document.getElementById("certificate")).then(canvas => {
+                let imgData = canvas.toDataURL("image/png");
+                let pdf = new jspdf.jsPDF({orientation: "landscape"});
+                pdf.addImage(imgData, "PNG", 10, 10, 280, 180);
+                pdf.save("certificate.pdf");
+            });
+        }
+    </script>
+</body>
+</html>
